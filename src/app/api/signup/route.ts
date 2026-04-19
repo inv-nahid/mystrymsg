@@ -3,8 +3,9 @@ import UserModel from "@/models/user.model";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
 
+// @POST /api/signup
 export async function POST(request: Request) {
-    await dbConnect()
+    await dbConnect() // Ensure database connection is established
 
     try {
         const { username, email, password } = await request.json()
@@ -13,7 +14,6 @@ export async function POST(request: Request) {
             username,
             isVerified: true
         })
-
         if (existingUserVerifiedByUsername) {
             return Response.json({
                 success: false,
@@ -23,25 +23,24 @@ export async function POST(request: Request) {
 
         const existingUserByEmail = await UserModel.findOne({ email })
         const verifyCode = Math.floor(100000 + Math.random() * 900000).toString()
-
         if (existingUserByEmail) {
             if (existingUserByEmail.isVerified) {
                 return Response.json({
                     success: false,
                     message: "User with this email already exists!"
                 }, { status: 400 })
-
-            } else {
+            }
+            else {
                 const hashedPassword = await bcrypt.hash(password, 10)
                 existingUserByEmail.password = hashedPassword
                 existingUserByEmail.verifyCode = verifyCode
                 existingUserByEmail.verifyCodeExpiry = new Date(Date.now() + 3600000) // 1 hour from now
                 await existingUserByEmail.save()
             }
-
-        } else {
+        }
+        else {
             const hashedPassword = await bcrypt.hash(password, 10)
-            const expiryDate = new Date()
+            const expiryDate = new Date() // new keyword is special because it creates an object whoch a reference point in memory, thus const can be used on it, because we are not reassigning the variable but mutating the object itself
             expiryDate.setHours(expiryDate.getHours() + 1)
 
             const newUser = new UserModel({
