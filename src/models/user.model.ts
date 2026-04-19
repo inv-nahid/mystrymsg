@@ -25,7 +25,7 @@ export interface User extends Document {
 const UserSchema: Schema<User> = new Schema({
     username: {
         type: String, required: [true, "Username is required"],
-        trim: true,
+        trim: true, // Remove whitespace from both ends of the string
         unique: true,
     },
     email: {
@@ -40,7 +40,6 @@ const UserSchema: Schema<User> = new Schema({
     isAcceptingMessage: { type: Boolean, default: true },
     messages: [MessageSchema],
     createdAt: { type: Date, default: Date.now }
-
 })
 
 const UserModel = (mongoose.models.User as mongoose.Model<User> || mongoose.model<User>("User", UserSchema))
